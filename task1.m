@@ -1,33 +1,46 @@
-% Task 1
+%% TASK 1 DP DSP
+close all;
+clc
+clear
+fs = 10e3;       %sampling frequnecy
+or = 10;
+% t = 0:1:10e3;   %frequency sweep values.
+% x = sin((2*pi)/t) 
 
-freq_c = @(f,r) 1/(2*pi*f*r)
-freq_r = @(f,r) 1/(2*pi*f*r)
+x = randn(20000,1);
 
-fL = 1e3
-fH = 4e3
+fc_low = 1e3;   %low cut off freq
+fc_high = 4e3;  % high cut off freq
 
-fc = sqrt(fL*fH)
-fbw = fH-fL
+fs_low = 100;   %low stop band cut off
+fs_high = 4500;  %high stop band cut off must be -17db or more.
 
-Q = fc/fbw
+% order must be 
 
-20*log(Q)
+% band_fir = designfilt('bandpassfir','FilterOrder',10,'StopbandFrequency1',fs_low, 'PassbandFrequency1',fc_low,'PassbandFrequency2',fc_high, 'StopbandFrequency2',fs_high,'SampleRate', fs)
+%  fvtool(band_fir)
+% band_iir = designfilt('bandpassiir','FilterOrder',10,'HalfPowerFrequency1',900,'HalfPowerFrequency2',4500, 'SampleRate', fs);
+xx = designfilt('bandpassiir', 'FilterOrder', 10, 'PassbandFrequency1', fc_low/fs, 'PassbandFrequency2', fc_high/fs)
 
-% low pass 
-cL = 0.1e-6;
-RL = 1/(2*pi*fL*cL);
-RL/(1e3);%kohms
-fprintf("\n RL,%d k ohms", RL/(1e3))
+% freqz(band_fir)
+fvtool(xx)
+fc = (fc_low + fc_high)/2
 
-% high pass
-cH = 0.1e-6;
-RH = 1/(2*pi*fH*cH);
-RH/(1e3); %kohms
-fprintf("\n RH,%d k ohms", RH/(1e3))
+%%
+f = @(R1, R2, C1, C2) 1/sqrt(2*pi*R1*R2*C1*C2)
 
-%% plotting code 
-Fs = 10e3;
-t = (0:2*pi)'/Fs; 
-x = sin(2*pi*xx);
+R1 = 32e3;
+R2 = 16e3;
+C1 = 10e-9;
+C2 = 10e-9;
 
-lowpass()
+f1_low = f(R1+0.05*R1, R2+0.05*R2, C1+0.1*C1, C2+0.1*C2)
+f1_high = f(R1-0.05*R1, R2-0.05*R2, C1-0.1*C1, C2-0.1*C2)
+
+R1 = 2550;
+R2 = 3105;
+C1 = 20e-9;
+C2 = 10e-9;
+
+f2_low = f(R1+0.05*R1, R2+0.05*R2, C1+0.1*C1, C2+0.1*C2)
+f2_high = f(R1-0.05*R1, R2-0.05*R2, C1-0.1*C1, C2-0.1*C2)
