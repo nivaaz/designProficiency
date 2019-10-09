@@ -1,0 +1,77 @@
+% dp_dsp_task_2
+%  audiorecorder(Fs, NBITS, NCHANS) creates an audiorecorder object with 
+%  sample rate Fs in Hertz, number of bits NBITS, and number of channels NCHANS. 
+clc
+clear
+%highest frequency shoulld be at 200Hz
+fs = 8e3;
+nbits = 1024;
+nchans = 1;
+L = 8; % decimation ratio
+M = 8; % upsampling ratio
+ar = audiorecorder(fs, nbits, nchans); %sample the data
+pause(1);  %wait for a seocnd.
+pause(ar); %stop the player recording.
+data = getaudiodata(ar, 'int16');
+% p = play(ar); %play the recording.
+%%  local testing 
+t = 1:100;
+data = sin(t*200/pi);
+% plot(data)
+%% decimation by a factor of 8 ?
+close all
+clc
+clear
+%   sample data for testing.
+t = 1:500;
+% data = sin(t*200/pi);
+data = square(t);
+fs = 8e3;
+
+L = 8;
+N = length(data);                   %length of the data.
+x_down = 1:floor((length(data)/8)); % make array 1/8th of total 0-X; round down.
+
+y = decimate_input(data);
+z = interp_input(y);
+
+figure;
+subplot(2, 2, 1);
+plot(t:length(data), data,'r');
+ylabel("data IN");
+
+subplot(2, 2, 2);
+plot(t:length(y), y, 'b');
+ylabel("y IN");
+
+subplot(2, 2, 3);
+plot(t:length(z), z, 'g');
+ylabel("Z OUT");
+
+subplot(2, 2, 4);
+plot(abs(fft(z)).^2, 'm');
+ylabel("FFT OUT");
+
+% digital low pass filter / upsampling 
+% theta = 2*pi*f/fs; %use the normalised frequency 
+% theta_c = pi/L; %since L and M are the same.
+% LOW PASS IS AT 500 HZ
+% arr_interp = lowpass(arr_up, 500/8e3);
+clc
+function data = decimate_input(arr)
+    %filter 
+    data = zeros(1, length(arr));
+    data = lowpass(arr, 500, 1e3)
+    %decimate 
+    sel = [1 (1:length(data)/8)*8];      % array to access 8th samples.
+    de = data(sel);                       %get 8th samples.
+end 
+
+function data = interp_input(arr)
+%decimate 
+    data =  zeros(1, length(arr)*8);          %full array.
+    sel =   [1 (1:length(arr)/8)*8];      % array to access 8th samples.
+    de(sel) = arr(1:length(sel));                       %get 8th samples.
+%filter 
+    data = lowpass(de, 500, 8e3)*8;
+end 
