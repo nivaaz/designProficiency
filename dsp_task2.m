@@ -37,21 +37,25 @@ z = interp_input(y);
 
 figure;
 subplot(2, 2, 1);
-plot(t:length(data), data,'r');
+plot(1:length(data), data,'r');
 ylabel("data IN");
+title("Data In");
 
 subplot(2, 2, 2);
-plot(t:length(y), y, 'b');
+plot(1:length(data),  y, 'b');
 ylabel("y IN");
+title("Decimated Output");
 
 subplot(2, 2, 3);
-plot(t:length(z), z, 'g');
+plot(1:length(z), z, 'g');
 ylabel("Z OUT");
+title("Interpolated Output");
 
 subplot(2, 2, 4);
-plot(abs(fft(z)).^2, 'm');
+plot(1:length(z), abs(fft(z)).^2, 1:length(data), abs(fft(data)).^2);
 ylabel("FFT OUT");
-
+title("Output FFT");
+legend(["output fft", "input fft"]);
 % digital low pass filter / upsampling 
 % theta = 2*pi*f/fs; %use the normalised frequency 
 % theta_c = pi/L; %since L and M are the same.
