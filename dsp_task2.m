@@ -79,3 +79,8 @@ function data = interp_input(arr)
 %filter 
     data = lowpass(de, 500, 8e3)*8;
 end 
+
+y=fft(originalData);
+n=length(originalData);
+fo = (0:n-1)*Fs_old/n;
+ogPower = abs(y).^2/n;
