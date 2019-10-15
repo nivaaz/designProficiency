@@ -3,19 +3,18 @@
 
 %% OPEN FILE.
 % [data_in, fs] = audioread('C:\Users\nkseh\OneDrive\Documents\Uni-Vazzy\dp\DSP\Task 4test_files\1.wav');
-[data_in, fs] = audioread('C:\Users\nkseh\OneDrive\Documents\Uni-Vazzy\dp\DSP\Task 4test_files\2.wav');
+[data_in, fs] = audioread('C:\Users\nkseh\OneDrive\Documents\Uni-Vazzy\dp\DSP\Task 4test_files\8.wav');
 
-%%  NEW ALGO
+%  NEW ALGO
 clc
 
 T = 1/fs
 in_fft = abs(fft(data_in)).^2;
 f_fft = linspace(1, fs/2, length(in_fft));  
 
-data_low = lowpass(data_in, 1500, fs);
-data_high = highpass(data_low, 200, fs);
+data_low = highpass(data_in, 200, fs);
+data_high = lowpass(data_low, 1000, fs);
 in_fft_h = abs(fft(data_high)).^2;
-
 
 N = length(data_in);
 f_en = data_in.^2;
@@ -26,9 +25,9 @@ n_plot = 3; %how many plots.
 n=0; %plotting number.
 
 speaking = zeros(1, N);
-step = 10;
+step = floor((20e-3)/T)
 for i = step:(N-step)
-   speaking(i) =  sum(f_en_h(1:step)) < sum(f_en_h(i:(i+step-1))); % noise > power.
+   speaking(i) =  mean(f_en_h(1:step)) < mean(f_en_h(i:(i+step-1))); % noise > power.
 end
 
 subplot(1, n_plot, 1);
