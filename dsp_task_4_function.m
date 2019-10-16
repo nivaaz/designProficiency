@@ -17,16 +17,18 @@ m_fac = 1;
     m = max(f_en);
     a/b
     if (a/b < 2)
-        m_fac = 5;
+        m_fac = 2;
     elseif (a/b < 20)
         m_fac = 1.5;
     elseif (a/b < 50)
-        m_fac = 1.5;        
+        m_fac = 1.6;        
     end 
     for i = step:(N-2*step)
     %    speaking(i) =  1.5*sum(f_en_h(1:step)) < sum(f_en_h(i:(i+step))); % noise > power.
-        speaking(i) =  a+1/m_fac< sum(f_en(i:(i+1.2*step))); % noise > power.
+        speaking(i) =  a*m_fac < sum(f_en(i:(i+1.2*step))); % noise > power.
     end
+    pp = find(speaking==1);
+    speaking(pp(1):pp(length(pp))) = 1;
 %     p = audioplayer(data_in, fs);
 %     play(p, fs);
 end
