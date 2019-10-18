@@ -1,120 +1,84 @@
+% task 3
 % Task 3: Digital Demodulation (L1)
 close all
 clc
 clear
 
-fs = 192e3;  %from specs.
-bw = 44.1e3; %from specs.
-%
-t = 1:500;
-fc = rand(1);
-fm = rand(1);
-Ac = rand(1)*10; %carrier amplitude.
-Am = rand(1)*10; %modulation amplitude.
+X=load('C:\Users\nkseh\OneDrive\Documents\Uni-Vazzy\dp\DSP\Task 3 Datasets\Set7.mat');
+Y=load('C:\Users\nkseh\OneDrive\Documents\Uni-Vazzy\dp\DSP\Task 3 Datasets\Noise.mat');
+noise_in = Y.noise;  %noise to subtract later..
 
-c = 0.5*sin(pi*t*fc/20)+0.5*sin(pi*t*fc/17);
-m = sin(pi*t*fm*50);
-data_carr_wave = Ac*c;
-data_mod_wave = Am*m;
-data_in_wave = ((Am*m+Ac).*c);
+fs = 192e3;
+t = 1:length(noise_in);
 
-% FFT FOR ALL 
-carr_fft = abs(fft(data_carr_wave)).^2;
-mod_fft = abs(fft(data_mod_wave)).^2;
-in_fft = abs(fft(data_in_wave)).^2;
-% SQUARED AND THEN FFT
+data_in_wave = X.S - noise_in;              %removing the noise.
+in_fft = abs(fft(data_in_wave)).^2;         %input signal fft.
+n = length(data_in_wave);                   % number of samples
+t_fft = (0:n-1)*(fs/n);                     % frequency range (fs = sampling frequency)
 
-in2_fft = abs(fft(data_in_wave.^2)).^2;
+%DE MODULATION ALGO.
+data_out_wave = data_in_wave;               %DATA OUTPUT WAVE.
+f_amp_max = max(in_fft)
+f_max = find(in_fft(2:length(in_fft)) == f_amp_max)          %find the max ampl location.
+fx = t_fft(f_max(1))                                        %CARRIER FREQUENCY.
+fx = 10750;
 
-y = lowpass(data_in_wave.^2, 10000/fs);
-y_sq = y.^1/2;
+% FFT FOR OUTPUT SIGNALS.
+% out_fft = abs(fft(data_out_wave)).^2;       %input signal fft.
+% m_fft = abs(fft(m_wave)).^2;                %input signal fft.
+% plot(t_fft, in_fft)
+t = (0:length(data_in_wave)-1)/fs;
+data_out_wave = data_in_wave.*cos(2*pi*fx*t) ;
+data_out_wave1 = data_in_wave.*sin(2*pi*fx*t) ;
 
-% figure; 
-% plot(t, y, t, data_in_wave);
-% title("low passed data");
-% legend(["lowpassed data in", "data in"]);
+% filter out aliased copies
+[num,den] = butter(14,fx/fs);
+sigI = filter(num,den,data_out_wave);    
+sigQ = filter(num,den,data_out_wave1);
 
-figure;
-subplot(2, 3, 1);
-plot(t, data_mod_wave, t, data_carr_wave, t, data_in_wave);
-ylabel("Amplitude");
-xlabel("Period");
-title("Input waves");
-legend(["Modulator", "Carrier", "Output"]);
+p = audioplayer(sigI, fs);
+play(p, fs);
 
-subplot(2, 3, 2);
-plot(t, data_in_wave, t, data_in_wave.^2);
-ylabel("Amplitude");
-xlabel("Period");
-title("Input signal (modulated wave)");
-legend(["Data in", "Data in squared"])
+%% 1
+p = audioplayer(sigI, fs);
+play(p, fs);
 
-subplot(2, 3, 3);
-plot(t, mod_fft, t, carr_fft);
-ylabel("Amplitude");
-xlabel("Hz");
-title("Input signal (FFT)");
-legend(["Modulator", "Carrier"]);
+%% 2
+p = audioplayer(sigI, fs);
+play(p, fs);
+%% 3
+p = audioplayer(sigQ, fs);
+play(p, fs);
 
-subplot(2, 3, 4);
-plot(t, in_fft, t, in2_fft);
-ylabel("Amplitude");
-xlabel("Hz");
-legend(["input ftt", "input squared fft"])
-title("Output signal (FFT)");
+%% 4
+p = audioplayer(sigI, fs);
+play(p, fs);
 
-subplot(2, 3, 5);
-plot(t, lowpass(in_fft.^2, 500/fs));
-ylabel("Amplitude");
-xlabel("Hz");
-title("Output signal (FFT)");
+%% 5
+p = audioplayer(sigI, fs);
+play(p, fs);
 
-subplot(2, 3, 6);
-plot(t, y_sq, t, data_carr_wave.^2,t, (data_carr_wave-y_sq).*sin(72*t) );
-ylabel("Amplitude");
-xlabel("Hz");
-title("Output signals");
-legend(["lowpass squared", "Carrier"])
-%%
-close all
-figure;
-subplot(1, 2, 1);
-wave_out = (data_carr_wave-y_sq).*sin(72*t)
-wave_out_fft = abs(fft(wave_out)).^2;
-
-plot(t,wave_out , t, data_in_wave);
-legend(["output", "input", "exp"])
-
-subplot(1, 2, 2);
-plot(t,wave_out_fft , t, in_fft);
-legend(["output", "input", "exp"])
+%% 6
+p = audioplayer(sigI, fs);
+play(p, fs);
 
 %%
-data_in = rand(1, length(t))+sin(t/pi);
+p = audioplayer(sigQ, fs);
+play(p, fs);
 
-f = fft(data_in)
-F = abs(f).^2;
-subplot(2, 2, 1);
-plot(t, data_in);
-ylabel("input data");
+%% plotting code.
+figure;
+subplot(3, 1, 1);
+plot(t, data_out_wave);
+title("data input wave");
+legend(["input", "output0"]);
 
-subplot(2, 2, 2);
-plot(t, abs(f).^2);
-ylabel("input data");
+subplot(3, 1, 2);
+plot(t_fft, in_fft, t_fft, out_fft, t_fft, m_fft);
+title("input wave fft")
+legend(["input", "output", "sin wave test"]);
 
-%find the highest frequency 
-% create a sine wave of this frequency
-% subtract it from data_in
-%%plot the output signal?
-
-max(F)
-% subplot(2, 2, 3);
-% plot(t, data_in);
-% ylabel("input data");
-% 
-% subplot(2, 2, 4);
-% plot(t, data_in);
-% ylabel("input data");
-
-title("input data");
-%% 
+subplot(3, 1, 3);
+plot(t, data_out_wave, t, data_out_wave1);
+title("data input wave");
+legend(["out sin", "out cos"]);
