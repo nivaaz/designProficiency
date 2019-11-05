@@ -11,14 +11,15 @@ devices = daq.getDevices
 devices(1)
 
 %getting the DAQ
-s = daq.createSession('ni');
+si = daq.createSession('ni');
+so = daq.createSession('ni');
 
 % ----- IO SET UP
 %INPUT CHANNELS
-addAnalogInputChannel(s,'Dev2', 0, 'Voltage');
-addAnalogInputChannel(s,'Dev2', 1, 'Voltage');
+addAnalogInputChannel(si,'Dev2', 0, 'Voltage');
+addAnalogInputChannel(si,'Dev2', 1, 'Voltage');
 %OUTPUT CHANNELS.
-addAnalogOutputChannel(s,'Dev2', 'ao0', 'Voltage');
+addAnalogOutputChannel(so,'Dev2', 'ao0', 'Voltage');
 
 %% ----- GENERATE DATA 
 % DURATION OF SAMPLING TIME
@@ -26,14 +27,13 @@ s.DurationInSeconds = 15
 
 fs = 1000
 f = 33.1e3;
-dur = 5;
+dur = 5; %5 seconds.
 
 % generate a 30 Hz square wave:
-[t, x0] = getPWM(f, fs, dur, 50);
 [t, x1] = getPWM(f, fs, dur, 50);         %get to steady state.
 [t, x2] = getPWM(f, fs, dur, 65);       %get to 
 
-pwm_out = [x0, x1, x2];     %concat the two arrays.
+pwm_out = [x1, x2];     %concat the two arrays.
 len = length(pwm_out);      %len of the two arrays.
 t = linspace(0, 3*dur, len);  %plotting sig the two arrays.
 
@@ -41,6 +41,17 @@ plot(t, pwm_out);
 ylabel("AMPLITUDE (VOLTS)")
 xlabel("TIME (S)")
 title("PWM OUT")
+
+%initialising the data array.
+data_in = zeros(1, len);
+
+%iterate over all the data
+for n = 1:len/2
+    tic
+    data_in(n) = si.inputSingleScan;        %scan data 
+    so.outputSingleScan(pwm_out(n));        %output data
+    toc
+end
 
 % ----- LOAD DATA.
 queueOutputData(s,pwm_out)
@@ -55,8 +66,8 @@ xlabel('Time');
 title('Acquired Signal');
 
 %% SINGLE SCAN FOR TESTING.
- data = s.inputSingleScan 
- [data,time] = s.startForeground; %blocks all matlab until aqc is complete.
+data = s.inputSingleScan 
+[data,time] = s.startForeground; %blocks all matlab until aqc is complete.
 
 %% testing output samples.
 clc
