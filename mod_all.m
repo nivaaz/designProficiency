@@ -34,6 +34,10 @@ for n = 1:8     %for the x axis
             sig1(sz*c:sz*c+sz) = sampleImage1(c);
             sig2(sz*c:sz*c+sz) = sampleImage2(c);
         end
+        modsig1 = sig1.*carr1;  %modulated signal 1
+        modsig2 = sig2.*carr2;  %modulated signal 2
+        x = modsig1+modsig2;
+        play(x);
     end
 end
 
