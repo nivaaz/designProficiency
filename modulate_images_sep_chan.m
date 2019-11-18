@@ -54,3 +54,13 @@ end
 
 plot(1:length(totalSigx), totalSigx);
 % to do,, simulate with noise source!!
+
+%% FUNCTIONS 
+%own function to convert num to binary.
+function B = numToBin(D)
+    B = zeros(1,8);     %declar array.
+    for k = 8:-1:1      %for 8 bits.
+      B(k) = mod(D,2);  %save the remainder
+      D = (D-B(k))/2;   %save to number.
+    end
+end
