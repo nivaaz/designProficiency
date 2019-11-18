@@ -50,3 +50,13 @@ for n = 1:8     %for the x axis
 end
 
 plot(1:length(totalSig), totalSig);
+
+%% FUNCTIONS 
+%own function to convert num to binary.
+function B = numToBin(D)
+    B = zeros(1,8);     %declar array.
+    for k = 8:-1:1      %for 8 bits.
+      B(k) = mod(D,2);  %save the remainder
+      D = (D-B(k))/2;   %save to number.
+    end
+end
