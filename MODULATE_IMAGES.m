@@ -1,52 +1,52 @@
+%% SEND WHOLE IMAGE WITH AM ONLY.
+clear
 clc
 close all
 
-% MAKE A RANDOM IMAGE
-sendImage = floor(rand([8 8])*255);
-
 % modulate signal
-fs = 10e3;
-fc1 = 9.3e3;        %carrier off frequency 1
-fc2 = 1.1e3;        %carrier off frequency 1
-
+fs = 40e3;                      %MUST BE THE SAME AS THE SENDER MACHINE!
+s = 1/fs;
 t = 0:1/fs:10e-3;            %timing
 sz = floor(length(t)/9);
 len = length(t);
 
-carr1 = sin(2*pi*t*fc1);    %carrier signal 1
-carr2 = sin(2*pi*t*fc2);    %carrier signal 2
+dur_start = 32*s;
+
+startPulse(1:16) = 1;               %high pulse
+startPulse(17:32) = -1;             %low pulse
+startPulse(33:48) = 1;              %high pulse
+startPulse(49:64) = -1;             %low pulse
+
+% MAKE A RANDOM IMAGE
+sendImage1 = floor(rand([8 8])*255);
+sendImage2 = floor(rand([8 8])*255);
 
 sig1 = zeros(1, length(t)); %signal1
 sig2 = zeros(1, length(t));
 
-sampleImage1 = 0.5*[1 1 1 0 1 1 1 0];    %sample signal
-sampleImage2 = 0.5*[0 0 0 1 1 1 0 0];    %sample signal
-
 t_high = 10/fs;
-%
-for c = 1:8%for all the time.
-    sig1(sz*c:sz*c+sz) = sampleImage1(c);
-    sig2(sz*c:sz*c+sz) = sampleImage2(c);
+totalSig = [1 1];    %FOR INTERNAL TESTING ONLY.
+
+for n = 1:8     %for the x axis
+    for m = 1:8 %for the y axis 
+        sampleImage1 = numToBin(sendImage1(n, m)); %make binary num.
+        sampleImage2 = numToBin(sendImage2(n, m));
+        for c = 1:8 %for all the time.
+            sig1(sz*c:sz*c+sz) = sampleImage1(c);  %create digital pulse.
+            sig2(sz*c:sz*c+sz) = sampleImage2(c);
+        end
+        x = 0.3*sig1+0.6*sig2;    %sum of signals, final signal.
+        %0.3 and 0.6 so we can see when either, or both are high.
+        %with enough noise margin!
+        if ((n==1) &&(m==1))
+            x = [startPulse x];
+%             play(x); 
+        end
+        totalSig = [totalSig x];
+%         pause(0.1);
+%         plot(1:length(x),x);
+%   play(x);                %plays the audio.
+    end
 end
 
-modsig1 = sig1.*carr1;  %modulated signal 1
-modsig2 = sig2.*carr2;  %modulated signal 2
-x = modsig1+modsig2;
-
-% plotting code.
-subplot(4, 1, 1);
-plot(t, sig1 ,t, carr1);
-legend(["signal input" "carrier signal"])
-
-subplot(4, 1, 2);
-plot(t, sig2 ,t, carr2);
-legend(["signal input" "carrier signal"])
-
-subplot(4, 1, 3);
-plot(t, x);
-legend(["Output Signal (Modulated)"])
-
-f = abs(fft(x)).^2;
-subplot(4, 1, 4);
-plot(t, modsig1, t, modsig2);
-legend(["one" "two"])
+plot(1:length(totalSig), totalSig);
