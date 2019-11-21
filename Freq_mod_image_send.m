@@ -27,16 +27,17 @@ sampleImage2 =  zeros(1, 8);
 t_high = 10/fs;
 
 % start of the signal pulse.
-startPulse(1:16) = 1;               %high pulse
-startPulse(17:32) = -1;             %low pulse
-startPulse(33:48) = 1;              %high pulse
-startPulse(49:64) = -1;             %low pulse
-
+t_sin = -pi:2*pi/63:pi;
+sp = 0.5+0.5*sin(2*pi*t_sin*30);
+% length(sp)
+startPulse = sp;
+% length(startPulse)
 modsig1 = zeros(1, 64+len);         %initliasing the modsig
 modsig2 = zeros(1, 64+len);
 binsig1 = zeros(1, sz*8);
 %notes: may need to check scale at output!
 
+%
 for ycount = 1:y_image  %for all the rows
     for xcount = 1:x_image %for all the cols.
         % grab the image pixel.
@@ -67,7 +68,7 @@ binsig1 = [startPulse binsig1];
 
 % plotting code.
 subplot(4, 1, 1);
-plot(linspace(1, dur, length(sigSum)), sigSum);
+plot(linspace(0, dur, length(sigSum)), sigSum);
 title("Sum of both Signals")
 ylabel("Amplitude (Volts)")
 legend(["SigSum"])
@@ -91,15 +92,6 @@ ylabel("Volts")
 legend(["ModSig2"])
 
 % FUNCTIONS 
-%own function to convert num to binary.
-function B = numToBin(D)
-    B = zeros(1,8);     %declar array.
-    for k = 8:-1:1      %for 8 bits.
-      B(k) = mod(D,2);  %save the remainder
-      D = (D-B(k))/2;   %save to number.
-    end
-end
-%% FUNCTIONS 
 %own function to convert num to binary.
 function B = numToBin(D)
     B = zeros(1,8);     %declar array.
